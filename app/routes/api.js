@@ -11,10 +11,13 @@ module.exports = function(app,express) {
 // route for authentication users
   apiRouter.post('/authenticate', function(req,res){
 
+    //
+    var inputUsername = req.body.username.toLowerCase();
+
     // find the user
-    // select the name username and password explicitly
+    // select the username and password explicitly
     User.findOne({
-      username: req.body.username }).select('name username password').exec(function(err,user) {
+      username: inputUsername }).select('username password').exec(function(err,user) {
       if (err) throw err;
 
       // no user with that username was found
@@ -37,7 +40,6 @@ module.exports = function(app,express) {
           // if user is found and password is right
           // create a token
           var token = jwt.sign({
-            name:user.name,
             username: user.username
           }, superSecret, {
             expiresInMintues: 1440 //expires in 24 hours
@@ -105,7 +107,6 @@ module.exports = function(app,express) {
       var user = new User();
 
       // set the users information (comes from the request)
-      user.name = req.body.name;
       user.username = req.body.username;
       user.password = req.body.password;
 
@@ -155,11 +156,7 @@ module.exports = function(app,express) {
 
         if(err) res.send(err);
 
-        //mg test
-        console.log('req.body.name', req.body.name);
-
         //update the users info only if its new
-        if (req.body.name) user.name = req.body.name;
         if (req.body.username) user.username = req.body.username;
         if (req.body.password) user.password = req.body.password;
 
